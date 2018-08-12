@@ -28,14 +28,14 @@ class GeoLogger
      */
     public function add($items)
     {
-        if ($items) {
+        if ($items && isset($items['items'])) {
             $cmd = \Yii::$app->db->createCommand();
 
             $insertData = [];
-            foreach ($items as $item) {
+            foreach ($items['items'] as $item) {
                 $insertData[] = [
                     'query' => $this->query,
-                    'description' => $item
+                    'description' => $item['full_address']
                 ];
             }
 

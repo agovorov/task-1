@@ -11,6 +11,7 @@ use yii\rest\Controller;
  */
 class AddressController extends Controller
 {
+
     /**
      * Only GET on index
      *
@@ -19,11 +20,42 @@ class AddressController extends Controller
     protected function verbs()
     {
         return [
-            'index' => ['GET', 'HEAD'],
+            'search' => ['GET', 'HEAD', 'OPTIONS'],
         ];
     }
 
-    public function actionIndex()
+    /**
+     * Правим CORS, в рельном проекте он будет вынесен в базовый класс (при необходимости)
+     *
+     * @return array
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $auth = $behaviors['authenticator'];
+        unset($behaviors['authenticator']);
+
+        // add CORS filter
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::className(),
+        ];
+
+        // re-add authentication filter
+        $behaviors['authenticator'] = $auth;
+        // avoid authentication on CORS-pre-flight requests (HTTP OPTIONS method)
+        $behaviors['authenticator']['except'] = ['options'];
+
+        return $behaviors;
+    }
+
+
+    /**
+     * Основное действие
+     *
+     * @return mixed
+     */
+    public function actionSearch()
     {
         $query = \Yii::$app->request->get('q');
         $hintService = \Yii::$app->hintService;
@@ -33,6 +65,7 @@ class AddressController extends Controller
         $logger = new GeoLogger($query);
         $logger->add($response);
 
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return $response;
     }
 }

@@ -20,12 +20,11 @@ class YandexHintFormatter implements HintFormatter
     function format($data)
     {
         $response = [];
-        if ($data && isset($data['features'])) {
-            foreach ($data['features'] as $row) {
-                $response[] = $row['properties']['GeocoderMetaData']['text'];
+        if ($data && isset($data['featureMember'])) {
+            foreach ($data['featureMember'] as $row) {
+                $response[] = $row['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'];
             }
         }
-
         return $response;
     }
 }
